@@ -1,0 +1,161 @@
+﻿@using Domain.Enums;
+@using Application.Extension
+@model AddTicketFlowViewModel
+
+@{
+    ViewData["Title"] = "ثبت ارجاع تیکت";
+    Layout = "~/Views/Shared/_NavbarLayout.cshtml";
+}
+<style>
+.odd{
+    padding-bottom:4%;padding-top:4%;padding-right: 2%;text-align: justify;background-color:#ffc0cb24;border-radius:10px;margin-right: 1%;
+}
+.even{
+    padding-bottom:4%;padding-top:4%;padding-right: 2%;text-align: justify;background-color: #0080001c;border-radius:20px;
+}
+</style>
+
+<div class="row"  style="margin-top:1%;">
+        <div class="col-md-3">
+            <label asp-for="Subject" class="control-label"></label>
+            <div class="col-md-12">
+                <input asp-for="Subject" class="form-control"  type="text" readonly></input>
+            </div>
+        </div>
+        <div class="col-md-3">
+        <label asp-for="Status" class="control-label"></label>
+        <div class="col-md-12">
+            <input asp-for="Status" class="form-control" value="@EnumExtensions.GetDisplayName((TicketStatus)Model.Status)" readonly></input>
+        </div>
+        </div>
+             <div class="col-md-6">
+        </div>
+
+</div>
+
+<div class="row" style="padding-top:1%;">
+        <div class="col-md-12">
+
+        @*            <table class="table table-responsive talble-hover table-striped">
+            <tr>
+            <th>ردیف</th>
+            <th>موضوع</th>
+            <th>شرح</th>
+            <th>تاریخ ایجاد</th>
+            <th></th>
+            </tr>
+
+            @if (Model != null && Model.TicketFlows.Any())
+            {
+            int p = 0;
+            foreach (var ticketFlow in Model.TicketFlows)
+            {
+            p++;
+            <tr>
+            <td>@p</td>
+            <td>@ticketFlow.StepId</td>
+            <td>@ticketFlow.StepDate</td>
+            <td>@Html.Raw(ticketFlow.Content)</td>
+            <td>@ticketFlow.IsRead</td>
+            <td>@ticketFlow.ReadDate</td>
+            <td>@ticketFlow.AnswerDate</td>
+            <td>@ticketFlow.UserId</td>
+
+            </tr>
+            }
+            }
+            </table>*@
+
+
+        @if (Model != null && Model.TicketFlows.Any())
+        {
+            int p = 0;
+            foreach (var ticketFlow in Model.TicketFlows)
+            {
+                var stepDateShamsi = PersianDate.Standard.ConvertDate.ToFa(ticketFlow.StepDate);
+                var readDateShamsi = PersianDate.Standard.ConvertDate.ToFa(ticketFlow.ReadDate);
+                ++p;
+                if ((p) % 2 != 0)
+                {
+                                       <div class="row" style="margin-right: 1%;margin-bottom: 1%;" >
+                                                       <div class="col-sm-6" >
+                                                           <div class="odd"> @Html.Raw(ticketFlow.Content)</div>
+                                                           <label>@stepDateShamsi</label> | <label> کاربر: @ticketFlow.UserId</label>
+                                                           | <label> خوانده شده در تاریخ :@readDateShamsi</label>
+                                                       </div>
+                                                       <div class="col-sm-6"></div>
+                                       </div>
+                }
+                else
+                {
+                                       <div class="row"  style="margin-left: 1%;margin-bottom: 1%;" >
+                                                        <div class="col-sm-6"></div>
+                                                       <div class="col-sm-6" >
+                                                           <div class="even"> @Html.Raw(ticketFlow.Content)</div>
+                                                           <label>@stepDateShamsi</label> | <label> کاربر: @ticketFlow.UserId</label>     | <label> خوانده شده در تاریخ :@readDateShamsi</label>
+                                                       </div>
+                                       </div>
+                }
+                @if (ticketFlow.FileNames != null && ticketFlow.FileNames.Any())
+                {
+                    foreach (var file in ticketFlow.FileNames)
+                    {
+                        <a class="btn btn-danger" href="@file" style="width:100px" target="_blank">فایل</a>
+                    }
+                }
+
+            }
+        }
+
+
+
+        </div>
+
+
+    </div>
+
+    <hr style="margin-top: 10%;"/>
+<div>
+    <form asp-area="SAdmin" asp-controller="Ticket" asp-action="ReferTicket" method="post">
+        <div asp-validation-summary="ModelOnly"></div>
+        <input type="hidden" asp-for="TicketId" />
+        <div class="col-md-4" style="float: right;">
+            <label asp-for="UserId" class="control-label"></label>
+            <div class="col-md-10">
+
+                @Html.DropDownList("UserId", (SelectList)ViewData["users"], "----انتخاب کنید----", new { @class = "form-control" })
+
+                <span asp-validation-for="UserId" class="text-danger"></span>
+            </div>
+
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label for="Closed">بستن تیکت</label>
+             
+
+                <input class="form-check-input" type="checkbox" name="Closed" value="true" id="Closed">
+            </div>
+        </div>
+
+        <div class="col-md-12" style="margin-top:1%;">
+            <label asp-for="ContentA" class="control-label"></label>
+            <div class="col-md-12">
+                  @Html.EditorFor(model => model.ContentA, new { @class = "form-control"})
+                <span asp-validation-for="ContentA" class="text-danger"></span>
+
+            </div>
+        </div>
+        <div class="col-md-12">
+            <button type="submit" class="btn btn-primary" style="margin-top:2%;">ثبت</button>
+        </div>
+
+
+    </form>
+</div>
+
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

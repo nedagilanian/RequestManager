@@ -1,0 +1,48 @@
+﻿@model AddUserToRoleViewModel
+@{
+    ViewData["Title"] = "افزودن نقش";
+        Layout = "~/Views/Shared/_NavbarLayout.cshtml";
+}
+
+<div class="col-md-4">
+
+
+    @if (!Model.UserRoles.Any())
+    {
+        <h1>هیچ مقامی یافت نشد</h1>
+    }
+    else
+    {
+        <form asp-area="SAdmin" asp-controller="ManageUser" asp-action="AddUserToRole" method="post">
+            <div asp-validation-summary="ModelOnly"></div>
+
+            @for (int i = 0; i < Model.UserRoles.Count; i++)
+            {
+                <div class="form-group">
+                    <input asp-for="@Model.UserRoles[i].IsSelected" />
+                    <label>@Model.UserRoles[i].RoleName</label>
+
+                    <input type="hidden" asp-for="@Model.UserRoles[i].RoleName" />
+                </div>
+            }
+            <input type="hidden" asp-for="@Model.UserId" />
+            <div class="d-flex justify-content-end gap-2 mt-3">
+                <button class="btn btn-primary" type="submit">ثبت</button>
+                @if (TempData["back"] != null)
+                {
+                    <a class="btn btn-danger" href="@TempData["back"]" style="width: 100px;">بازگشت</a>
+                }
+            </div>
+
+        </form>
+    }
+
+</div>
+
+@section Scripts {
+
+<script>
+
+</script>
+    }
+

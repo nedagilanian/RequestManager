@@ -1,0 +1,28 @@
+﻿@using Domain.ViewModels.Paging
+@model CurrentPaging
+
+<nav aria-label="Page navigation example">
+    <ul class="pagination">
+        @if (Model.Page > 1)
+        {
+            <li class="cursor-pointer page-item"><a class="page-link" aria-label="قبلی" onclick="FillPageId(@(Model.Page - 1))">  <span aria-hidden="true">&laquo;</span></a></li>
+        }
+        @if (Model.Page - Model.HowManyPagesShowAfterAndBefore > 1)
+        {
+            <li class="cursor-pointer page-item"><a class="page-link" onclick="FillPageId(1)">1 ...</a></li>
+        }
+        @for (var i = Model.StartPage; i <= Model.EndPage; i++)
+        {
+            <li class="@(Model.Page == i ?"active":"") cursor-pointer page-item"><a class="page-link" onclick="FillPageId(@i)">@i</a></li>
+        }
+        @if (Model.Page + Model.HowManyPagesShowAfterAndBefore < Model.PagesCount)
+        {
+            <li class="cursor-pointer page-item"><a class="page-link" onclick="FillPageId(@(Model.PagesCount))">... @Model.PagesCount</a></li>
+        }
+        @if (Model.Page < Model.EndPage)
+        {
+            <li class="cursor-pointer page-item"><a class="page-link" onclick="FillPageId(@(Model.Page + 1))" aria-label="بعدی">     <span aria-hidden="true">&raquo;</span></a></li>
+        }
+    </ul>
+
+</nav>

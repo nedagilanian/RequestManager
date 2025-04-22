@@ -1,0 +1,157 @@
+﻿@using Domain.ViewModels.User
+@model FilterUserViewModel
+@{
+    ViewData["Title"] = "لیست کاربران";
+    Layout = "~/Views/Shared/_NavbarLayout.cshtml";
+}
+<style>
+    th {
+        text-align: right;
+    }
+</style>
+<div class="col-md-12">
+    <a asp-area="SAdmin" asp-controller="ManageUser" asp-action="Register" class="btn btn-success btn-block" style="width: 200px;">ثبت کاربر جدید</a>
+    <br />
+    <br />
+    <div class="widget">
+        <div class="widget-header bordered-bottom bordered-blue">
+        </div>
+        <div class="widget-body">
+            <div>
+                <form method="get" id="filter-form" asp-area="SAdmin" asp-controller="ManageUser" asp-action="Index">
+                    <input type="hidden" asp-for="Page" />
+                    <div class="row">
+                        <div class="col-md-2">
+                             <div class="form-group">
+                                 <label asp-for="NationalCode"> </label>
+                                 <input class="form-control" asp-for="NationalCode">
+                             </div>
+                        </div>
+                        <div class="col-md-2">
+                             <div class="form-group">
+                                 <label asp-for="LastName"> </label>
+                                 <input class="form-control" asp-for="LastName">
+                             </div>
+                        </div>
+                        <div class="col-md-2">
+                                  <div class="form-group">
+                                     <label asp-for="UserName"> </label>
+                                     <input class="form-control" asp-for="UserName">
+                                  </div>
+                        </div>
+                        <div class="col-md-2">
+                                      <div class="form-group">
+                                           <label asp-for="Mobile"> </label>
+                                           <input class="form-control" asp-for="Mobile">
+                                      </div>
+                        </div>
+                         <div class="col-md-2">
+                                 <div class="form-group">
+                                  <label asp-for="Role"></label>
+                                @Html.DropDownList("Role", (SelectList)ViewData["Roles"], "----انتخاب کنید----", new { @class="form-control" })
+                             </div>
+                         </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label for="TakeEntity">تعداد رکورد</label>
+                                <select class="form-control" asp-for="TakeEntity">
+                                    <option value="1">1</option>
+                                    <option value="5">5</option>
+                                    <option value="10">10</option>
+                                    <option value="15">15</option>
+                                </select>
+                            </div>
+                        </div>
+
+
+                    </div>
+
+
+                    <div class="row" style="padding-top:1%;">
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary btn-blue btn-block" style="width: 200px;">فیلتر</button>
+                        </div>
+                        <div class="col-md-3"></div>
+                        <div class="col-md-3"></div>
+                        <div class="col-md-3"></div>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row" style="padding-top:1%;">
+    <div class="col-md-12">
+
+            <table class="table table-responsive talble-hover table-striped">
+            <tr>
+                <th>ردیف</th>
+                <th>کد ملی</th>
+                <th>نام کاربری</th>
+                <th>نام </th>
+                <th>نام خانوادگی</th>
+                <th>شماره همراه</th>
+                <th>دفتر</th>
+                <th>دانشگاه</th>
+                <th>امکانات</th>
+
+            </tr>
+
+            @if (Model != null && Model.Entities.Any())
+            {
+                int p = 0;
+                foreach (var user in Model.Entities)
+                {
+                    p++;
+                                            <tr>
+                                                <td>@p</td>
+                                                <td>@user.NationalCode</td>
+                                                <td>@user.UserName</td>
+                                                <td>@user.FirstName</td>
+                                                <td>@user.LastName</td>
+                                                <td>@user.PhoneNumber</td>
+
+                                                <td>@user.OfficeName</td>
+                                                <td>@user.UniversityName</td>
+
+                                                <td>
+                                                    <a asp-area="SAdmin" asp-controller="ManageUser" asp-action="EditUser" asp-route-id="@user.Id"
+                       class="btn btn-primary">ویرایش</a>
+                                                    <a asp-area="SAdmin" asp-controller="ManageUser" asp-action="SetPassword" asp-route-id="@user.Id"
+                       class="btn btn-warning ">تغییر رمز عبور</a>
+
+                                                    <a asp-area="SAdmin" asp-controller="ManageUser" asp-action="EditUserRole" asp-route-id="@user.Id"
+                       class="btn btn-primary">ویرایش نقش</a>
+                            @*      <a asp-area="SAdmin" asp-controller="ManageUser" asp-action="RemoveUserFromRole" asp-route-id="@user.Id"
+                                class="btn btn-danger">حذف نقش</a>*@
+
+
+                                                </td>
+
+                                            </tr>
+                }
+            }
+        </table>
+        <hr />
+
+    </div>
+
+
+</div>
+
+
+<div class="row" style="padding-top:1%;">
+
+    <div class="col-md-5"><p>@Model.ShowPagingTitle()</p></div>
+    <div class="col-md-4"><partial name="_PagingPartial" model="@(Model.GetCurrentPaging())" /></div>
+    <div class="col-md-3"></div>
+
+</div>
+
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

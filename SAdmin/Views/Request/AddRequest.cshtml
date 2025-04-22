@@ -1,0 +1,145 @@
+﻿@using Domain.ViewModels.Request
+@model RequestViewModel
+
+@{
+    ViewData["Title"] = "ثبت درخواست";
+    Layout = "~/Views/Shared/_NavbarLayout.cshtml";
+}
+
+<div>
+    @*<div class="row" style="background-color: #f5f55163;line-height: 50px;border-radius: 4%;color: #b51818;font-weight: bold;">
+        <p>کاربر محترم توجه فرمایید: درصورت نیاز به بارگذاری فایل،حجم فایل انتخابی شما باید کمتر از 200کیلو بایت باشد</p>
+      </div>*@
+
+    <form asp-area="SAdmin" asp-controller="Request" asp-action="AddRequest" method="post" enctype="multipart/form-data" >
+
+       <div asp-validation-summary="ModelOnly"></div>
+        <div class="row" style="margin-bottom:1%;">
+           <div class="col-md-12">
+               <label asp-for="Title" class="control-label"></label>
+                <input type="text" asp-for="Title" class="form-control" />
+           </div>
+        </div>
+        <div  class="row" style="margin-bottom:1%;">
+           <div class="col-md-3">
+                   <label asp-for="Type" class="control-label"></label>
+                         <select class ="form-control" name="Type" id="Type">
+                                    <option value="0">انتخاب کنید</option>
+                                    <option value="1">قابلیت</option>
+                                    <option value="2">گزارش</option>
+                                    <option value="3">داده خام</option>
+                         </select>
+           </div>
+           <div class="col-md-3">
+               <label asp-for="SystemId" class="control-label"></label><span style="color: red;">*</span>
+                     @Html.DropDownList("SystemId", Model.SystemTitles, "----انتخاب کنید----", new { @class = "form-control" ,onchange="GetSubSystems()"})
+                     <span asp-validation-for="SystemId" class="text-danger"></span>
+           </div>
+           <div class="col-md-3">
+                 <label asp-for="SubSystemId" class="control-label"></label><span style="color: red;">*</span>
+                  @Html.DropDownList("SubSystemId", Model.SystemTitles, "----انتخاب کنید----", new { @class = "form-control"})
+                  @*<select asp-for="SubSystemId"   class="form-control">
+                            <option>انتخاب کنید...</option>
+                  </select>*@
+                 <span asp-validation-for="SubSystemId" class="text-danger"></span>
+           </div>
+           <div class="col-md-3">
+                  <label asp-for="RequestDate" class="control-label"></label>
+                  <input type="text" class="form-control"  asp-for="RequestDate" value=" @PersianDate.Standard.ConvertDate.ToFa(DateTime.Now)" disabled>
+           </div>
+
+        </div>
+
+        <div  class="row" style="margin-bottom:1%;">
+          
+            <div class="col-md-3">
+                  <label asp-for="OfferDoneDate" class="control-label"></label>
+                 <div class="input-group mb-3">
+                      <span class="input-group-text cursor-pointer" id="OfferDoneDate">📅</span>
+                      <input type="text" class="form-control"   data-name="OfferDoneDate-text">
+                       <input type="hidden" asp-for="OfferDoneDate"  name="OfferDoneDate"   data-name="OfferDoneDate-date">
+                </div>
+           </div>
+           <div class="col-md-3">
+                <label asp-for="Priority" class="control-label"></label>
+                <select asp-for="Priority"   class="form-control">
+                    <option value="0">انتخاب کنید </option>
+                    <option value="1">زیاد</option>
+                    <option value="2">متوسط</option>
+                    <option value="3">کم</option>
+                </select>
+           </div>
+           <div class="col-md-3">
+
+           </div>
+
+        </div>
+
+        <div class="row"  style="margin-bottom:1%;">
+            <div  class="col-md-12">
+                            <label asp-for="Content" class="control-label"></label>
+             <textarea asp-for="Content" class="form-control" id="Content"></textarea>
+             <span asp-validation-for="Content" class="text-danger"></span>
+
+            </div>
+
+        </div>
+        <div class="row" style="margin-bottom:1%;">
+            <div class="col-md-12">
+                   <label asp-for="ImportantPoints" class="control-label"></label>
+                   <textarea asp-for="ImportantPoints" class="form-control" ></textarea>
+            </div>
+
+         </div>
+
+        <div   class="row" style="margin-bottom:1%;">
+            <div class="col-md-8">
+                  <label asp-for="fileDes"  class="control-label"></label>
+                  <input type="text" asp-for="fileDes" class="form-control" />
+            </div>
+            <div class="col-md-4">
+                 <label  class="control-label">انتخاب فایل:</label>
+                 <br>
+                 <input type="file" name="FileNames"  asp-for="FileNames" multiple data-btnClass="btn btn-primary" class="filestyle" data-text="انتخاب فایل" data-placeholder="فایل مورد نظر را انتخاب نمایید" />
+            </div>
+
+        </div>
+
+        <div class="row" style="margin-bottom:1%;">
+            <button type="submit" class="btn btn-primary" style="margin-top:2%;width: 100px;margin-left: 1%;">ثبت</button>
+
+            @if (TempData["back"] != null)
+            {
+                  <a class="btn btn-danger"  href="@TempData["back"]" style="margin-top:2%;width:100px">بازگشت</a>
+            }
+
+        </div>
+
+    </form>
+</div>
+
+
+
+@section Scripts {
+
+
+@*<script src="/Scripts/ckeditor/adapters/jquery.js"></script>*@
+@*<script src="/Scripts/ckeditor/ckeditor.js"></script>
+<script src="/Scripts/ckeditor/config.js"></script>*@
+
+<script>
+
+    //$(function () {
+    //    $("#Content").ckeditor();
+    //})
+
+const dtp1Instance = new mds.MdsPersianDateTimePicker(document.getElementById('OfferDoneDate'), {
+  targetTextSelector: '[data-name="OfferDoneDate-text"]',
+  targetDateSelector: '[data-name="OfferDoneDate-date"]',
+});
+
+</script>
+
+
+}
+

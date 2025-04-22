@@ -1,0 +1,248 @@
+﻿@using Domain.ViewModels.Ticket
+@using Application.Extension
+@using Domain.Enums
+@model FilterTicketViewModel
+@{
+    Layout = "~/Views/Shared/_NavbarLayout.cshtml";
+}
+@if (TempData["SuccessMessage"] != null)
+{
+        <div class="alert-success" role="alert" >@TempData["SuccessMessage"]?.ToString()</div>
+}
+<style>
+th{
+        text-align: right;
+}
+</style>
+<div class="row">
+
+    <div class="col-md-12">
+        @*       <a asp-area="Ticket" asp-controller="Ticket" asp-action="CreateTicket" class="btn btn-success btn-block" style="width: 200px;">ثبت تیکت جدید</a>
+            <br />
+            <br />*@
+        <div class="widget">
+            <div class="widget-header bordered-bottom bordered-blue">
+                @*    <span class="widget-caption">جستجوی تیکت ها</span>*@
+            </div>
+            <div class="widget-body">
+                <div>                   
+                    <form method="get" id="filter-form" asp-area="SAdmin" asp-controller="Ticket" asp-action="Index">
+                        <input type="hidden" asp-for="Page" />
+
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>موضوع</label>
+                                    @Html.DropDownList("Subject", (SelectList)ViewData["subjects"], "----انتخاب کنید----", new { @class="form-control" })
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                             <div class="form-group">
+                                    <label for="InsertDateFrom">تاریخ ایجاد از</label>
+                                    @{
+                                        var today = PersianDate.Standard.ConvertDate.ToFa(DateTime.Now.AddDays(1));
+                                        var bday = PersianDate.Standard.ConvertDate.ToFa(DateTime.Now.AddDays(-90));
+
+                                        if (Model.InsertDateFrom != null)
+                                        {
+                                            bday = Model.InsertDateFrom;
+                                        }
+                                        if (Model.InsetDateTo != null)
+                                        {
+                                            today = Model.InsetDateTo;
+                                        }
+                                    }
+                                    <input name="InsertDateFrom" id="InsertDateFrom" type="text" class="form-control" data-mddatetimepicker="true" value="@bday" data-placement="right" />
+                               
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                  <div class="form-group">
+                                    <label for="InsetDateTo">تاریخ ایجاد تا</label>
+                                    <input name="InsetDateTo" id="InsetDateTo" type="text" class="form-control" data-mddatetimepicker="true" value="@today" data-placement="right" />
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="Status">مرحله</label>
+
+                                    <select asp-for="Status"
+                                            class="form-control"
+                                            asp-items="Html.GetEnumSelectList<TicketStatus>()">
+                                        <option>انتخاب کنید...</option>
+                                    </select>
+                                </div>
+                            </div>
+                               <div class="col-md-2">
+                                          <div class="form-group">
+                                    <label asp-for="TrackingNumber"></label>
+                                     <input class="form-control" asp-for="TrackingNumber">
+                                        </div>
+                             </div>
+                                 <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="TakeEntity">تعداد رکورد</label>
+                                    <select class="form-control" asp-for="TakeEntity">
+                                        <option value="1">1</option>
+                                        <option value="5">5</option>
+                                        <option value="10">10</option>
+                                        <option value="15">15</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                        </div>
+                         <div class="row" style="padding-top:1%;">
+
+                                 <div  class="form-group"> <button type="submit" class="btn btn-primary btn-blue btn-block"  style="width: 200px;">فیلتر</button></div>
+
+                         </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="row" style="padding-top:1%;">
+        <div class="col-md-12">
+
+            <table class="table table-responsive talble-hover table-striped">
+                <tr>
+                    <th>ردیف</th>
+                    <th>موضوع</th>
+                    <th>عنوان</th>
+                    @if (!User.IsInRole("Office") && !User.IsInRole("Assistant"))
+                    {
+                         <th>فرستنده</th>
+                         <th>گیرنده</th>
+                    }
+                    <th>شماره پیگیری</th>
+                    <th>تاریخ ایجاد تیکت</th>
+                    <th>مرحله</th>
+                    <th></th>
+                </tr>
+
+                @if (Model != null && Model.Entities.Any())
+                {
+                    int p = 0;
+                    foreach (var ticket in Model.Entities.OrderByDescending(x => x.IsOffertoCloseDate).ToList())
+                    {
+                        p++;
+                                <tr>
+                                    <td>@p</td>
+                                    <td>@ticket.Subject.Title</td>
+                            @{
+                                var ticketTitle = "";
+                                if (ticket.Title.Length > 30)
+                                {
+
+                                    ticketTitle = ticket.Title.Substring(0, 30) + "...";
+                                }
+                                else
+                                {
+                                    ticketTitle = ticket.Title.Substring(0, ticket.Title.Length);
+                                }
+
+                            }
+                                    <td>@ticketTitle</td>
+                            @if (!User.IsInRole("Office") && !User.IsInRole("Assistant"))
+                            {
+                                               <td>@ticket.User.FirstName @ticket.User.LastName</td> 
+                                               <td>@ticket.AssignUser?.FirstName @ticket.AssignUser?.LastName</td> 
+                            }
+                                    <td>@ticket.Id</td>
+                            @{
+                                var insertDateShamsi = PersianDate.Standard.ConvertDate.ToFa(ticket.InsertDateTime);
+                            }
+                                    <td>@insertDateShamsi</td>
+                                    <td>@EnumExtensions.GetDisplayName((TicketStatus)ticket.Status)</td>
+
+                                    <td>
+                                        <a asp-area="Ticket" asp-controller="Ticket" asp-action="TicketDetails" asp-route-ticketId="@ticket.Id" class="btn btn-warning">جزییات</a>
+
+
+                                @if (!User.IsInRole("Office") && !User.IsInRole("Assistant"))
+                                {
+                                    if (!((TicketStatus)ticket.Status == TicketStatus.Checked && User.IsInRole("TicketAdmin")))
+                                    {
+
+                                                        <a asp-area="Ticket" asp-controller="Ticket" asp-action="ReferTicket" asp-route-ticketId="@ticket.Id" class="btn btn-warning">ارجاع</a>
+
+                                    }
+
+                                }
+
+                                @if ((TicketStatus)ticket.Status != TicketStatus.Checked)
+                                {
+                                                <a asp-area="Ticket" asp-controller="Ticket" asp-action="AnswerTicket" asp-route-ticketId="@ticket.Id" class="btn btn-warning">پاسخ</a>
+
+                                }
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    if ((ticket.Status != (byte)TicketStatus.ClosedByTicketAdmin || ticket.Status != (byte)TicketStatus.Finished)
+                                    && ticket.IsOffertoClose)
+                                    {
+                                                            <a class="btn btn-danger" onclick="AdminCloseTicket(@ticket.Id)">بستن</a>
+
+                                    }
+
+                                }
+
+                                    </td>
+
+
+                                </tr>
+                    }
+                }
+            </table>
+            <hr />
+
+        </div>
+
+
+
+
+    </div>
+
+
+    <div class="row" style="padding-top:1%;">
+
+        <div class="col-md-5"><p>@Model?.ShowPagingTitle()</p></div>
+        <div class="col-md-4"><partial name="_PagingPartial" model="@(Model?.GetCurrentPaging())" /></div>
+        <div class="col-md-3"></div>
+
+    </div>
+
+</div>
+@section Scripts {
+
+    <partial name="_ValidationScriptsPartial" />
+    }
+    <script>
+
+function AdminCloseTicket(ticketId) {
+    //$.get('/SAdmin/Ticket/CloseTicket/' + ticketId).then(res => {
+
+    //    if (res.status === 'successTicketAdmin') {
+    //        $('#msgAlert').text('تیکت بسته شد');
+    //    } 
+    //});
+
+        $.ajax({
+                        type: 'Get',
+                        dataType: 'json',
+                        url:'AdminCloseTicket',
+                        data: { id:ticketId },
+                        success: function (data) {
+    
+    window.location.reload();
+                        }
+                    });
+
+
+
+
+}
+    </script>

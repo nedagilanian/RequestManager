@@ -1,0 +1,99 @@
+﻿@model AddUserToRoleViewModel
+@{
+    ViewData["Title"] = "حذف نقش";
+    Layout = "~/Views/Shared/_NavbarLayout.cshtml";
+}
+      <form asp-area="SAdmin" asp-controller="ManageUser" asp-action="EditUserRole" method="post">
+
+<div class="row">
+
+<div class="col-md-4">
+
+   <div asp-validation-summary="ModelOnly"></div>
+            @if (!Model.UserRoles.Any())
+            {
+            <h1>هیچ نقشی یافت نشد</h1>
+            }
+            else
+            {
+                for (int i = 0; i < Model.UserRoles.Count - 5; i++)
+                {
+                    <div class="form-group">
+                        <input asp-for="@Model.UserRoles[i].IsSelected" />
+                        <label>@Model.UserRoles[i].RoleNameFa</label>
+
+                        <input type="hidden" asp-for="@Model.UserRoles[i].RoleName" />
+                        <input type="hidden" asp-for="@Model.UserRoles[i].RoleNameFa" />
+                    </div>
+                }
+            }
+
+</div>
+
+<div class="col-md-4">
+
+            @if (Model.UserRoles.Count > 6)
+            {
+
+                for (int i = 6; i < Model.UserRoles.Count; i++)
+                {
+                    <div class="form-group">
+                        <input asp-for="@Model.UserRoles[i].IsSelected" />
+                        <label>@Model.UserRoles[i].RoleNameFa</label>
+
+                        <input type="hidden" asp-for="@Model.UserRoles[i].RoleName" />
+                        <input type="hidden" asp-for="@Model.UserRoles[i].RoleNameFa" />
+                    </div>
+                }
+            }
+
+</div>
+<div class="col-md-4">
+    <div style="display:none" id="selectOffice">
+                @if (TempData["officeList"] != null)
+                {
+            <label>انتخاب دفتر برای مسئول فنی</label>
+                    @Html.DropDownList("OfficeId",(IEnumerable<SelectListItem>)TempData["officeList"],new{@class="form-control"})
+                }
+    </div>
+</div>
+
+</div>
+<div class="row">
+    <div class="col-md-4">
+   <input type="hidden" asp-for="@Model.UserId" />
+    <div class="d-flex justify-content-end gap-2 mt-3">
+        <button class="btn btn-primary" type="submit" style="width: 200px;">ثبت</button>
+        @if (TempData["back"] != null)
+        {
+            <a class="btn btn-danger" href="@TempData["back"]" style="width: 100px;">بازگشت</a>
+        }
+    </div>
+
+    </div>
+
+</div>
+   </form>
+@section Scripts {
+    <script>
+
+          $(document).ready(function() {
+               $("#selectOffice").css("display","none");
+
+                $('#UserRoles_8__IsSelected').on('change', function(){
+                     if($("#UserRoles_8__IsSelected").is(':checked')){
+                            $("#selectOffice").css("display","block");
+                        }
+                        else{
+       $("#selectOffice").css("display","none");
+                        }
+                     });
+                });
+
+
+
+
+
+    </script>
+}
+

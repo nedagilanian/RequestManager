@@ -1,0 +1,180 @@
+﻿@using Domain.ViewModels.Request
+@using Application.Extension
+@using Domain.Enums
+@model FilterRequestViewModel
+@{
+    Layout = "~/Views/Shared/_NavbarLayout.cshtml";
+}
+@if (TempData["SuccessMessage"] != null)
+{
+                <div class="alert-success" role="alert" >@TempData["SuccessMessage"]?.ToString()</div>
+}
+<style>
+th{
+        text-align: right;
+}
+</style>
+<div class="row">
+
+    <div class="col-md-12">
+        <div class="widget">
+            <div class="widget-header bordered-bottom bordered-blue">
+
+            </div>
+            <div class="widget-body">
+                <div>                   
+                <form method="get" id="filter-form" asp-area="SAdmin" asp-controller="Request" asp-action="Cartable">
+                        <input type="hidden" asp-for="Page" />
+
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                <label asp-for="DoneBy" class="control-label"></label>
+
+                                     <select class ="form-control" name="DoneBy" id="DoneBy">
+                                    <option>انتخاب کنید</option>
+                                    <option value="532">خانم امیری</option>
+                                    <option value="2">خانم نعمتی</option>
+                                    <option value="3">خانم دلاوری</option>
+                                </select>
+                                </div>
+                            </div>
+                               <div class="col-md-2">
+                                          <div class="form-group">
+                                    <label asp-for="TrackingNumber"></label>
+                                     <input class="form-control" asp-for="TrackingNumber">
+                                        </div>
+                             </div>
+
+                        </div>
+                         <div class="row" style="padding-top:1%;">
+
+                                 <div  class="form-group"> <button type="submit" class="btn btn-primary btn-blue btn-block"  style="width: 200px;">فیلتر</button></div>
+
+                         </div>
+
+                </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="row" style="padding-top:1%;">
+        <div class="col-md-12">
+
+            <table class="table table-responsive talble-hover table-striped">
+                <tr>
+                    <th>ردیف</th>
+                    <th>شماره پیگیری</th>
+                    <th>عنوان</th>
+                    <th>نوع درخواست</th>
+                    <th>تاریخ درخواست</th>
+                    <th>وضعیت</th>
+                    <th>مرحله-مجری</th>
+                    <th>امکانات</th>
+                </tr>
+
+                @if (Model != null && Model.Entities.Any())
+                {
+                    int p = 0;
+                    foreach (var req in Model.Entities.OrderByDescending(x => x.Id).ToList())
+                    {
+                        p++;
+                        var reqTitle = "";
+                        var stateStr = "";
+                        if (req.Title.Length > 30)
+                        {
+                            reqTitle = req.Title.Substring(0, 30) + "...";
+                        }
+                        else
+                        {
+                            reqTitle = req.Title.Substring(0, req.Title.Length);
+                        }
+                        var reqtype = "";
+                        if (req.Type == 1)
+                        {
+                            reqtype = "قابلیت";
+                        }
+                        else if (req.Type == 2)
+                        {
+                            reqtype = "گزارش";
+                        }
+                        else if (req.Type == 3)
+                        {
+                            reqtype = "داده خام";
+                        }
+                        var stepstr = "";
+                        if (req.Step != null)  
+                        {
+                            stepstr = EnumExtensions.GetDisplayName((RequestStep)req.Step);
+                        }
+                        if (req.State != null)
+                        {
+                            stateStr = EnumExtensions.GetDisplayName((RequestState)req.State);
+                        }
+                        var RequestDateShamsi = PersianDate.Standard.ConvertDate.ToFa(req.RequestDate);
+
+                            <tr>
+                               <td>@p</td>
+                               <td>@req.Id</td>
+                               <td>@reqTitle</td>
+                               <td>@reqtype</td>
+                               <td>@RequestDateShamsi</td>
+                               <td> @stateStr</td>
+                               <td> @stepstr - @req.DoneByName</td>
+                               <td>
+                                @if (req.Step == (byte)RequestStep.Final)
+                                {
+                                   <a asp-area="SAdmin" asp-controller="Request" asp-action="CheckByAdmin" asp-route-requestId="@req.Id" class="btn btn-secondary">مشاهده</a>
+                                }
+                                else if (req.Step == (byte)RequestStep.Implementation)
+                                {
+                                   <a asp-area="SAdmin" asp-controller="Request" asp-action="CheckByAdmin" asp-route-requestId="@req.Id" class="btn btn-success">مشاهده</a>
+                                }
+                                else if (req.Step == (byte)RequestStep.Check)
+                                {
+                                   <a asp-area="SAdmin" asp-controller="Request" asp-action="CheckByAdmin" asp-route-requestId="@req.Id" class="btn btn-warning">مشاهده</a>
+                                }
+                                else if (req.Step == (byte)RequestStep.Test)
+                                {
+                                   <a asp-area="SAdmin" asp-controller="Request" asp-action="CheckByAdmin" asp-route-requestId="@req.Id" class="btn btn-primary">مشاهده</a>
+                                }
+                                else
+                                {
+                                    <a asp-area="SAdmin" asp-controller="Request" asp-action="CheckByAdmin" asp-route-requestId="@req.Id" class="btn btn-danger">مشاهده</a>
+                                }
+
+                               </td>
+
+
+                             </tr>
+                    }
+                }
+            </table>
+            <hr />
+
+        </div>
+
+
+
+
+    </div>
+
+
+    <div class="row" style="padding-top:1%;">
+
+        <div class="col-md-5"><p>@Model?.ShowPagingTitle()</p></div>
+        <div class="col-md-4"><partial name="_PagingPartial" model="@(Model?.GetCurrentPaging())" /></div>
+        <div class="col-md-3"></div>
+
+    </div>
+
+</div>
+@section Scripts {
+
+    <partial name="_ValidationScriptsPartial" />
+    }
+    <script>
+
+    </script>

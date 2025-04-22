@@ -1,0 +1,530 @@
+﻿@using Domain.Enums;
+@using Application.Extension
+@model Domain.ViewModels.Request.RequestViewModel
+
+@{
+    ViewData["Title"] = "بررسی درخواست توسط مدیر فنی";
+    Layout = "~/Views/Shared/_NavbarLayout.cshtml";
+
+    if (Model.SeenDate != null)
+    {
+        Model.SeenDateShamsi = PersianDate.Standard.ConvertDate.ToFa(Model.SeenDate);
+    }
+    else
+    {
+        Model.SeenDateShamsi = PersianDate.Standard.ConvertDate.ToFa(DateTime.Now);
+    }
+
+    if (Model.RequestDate != null)
+    {
+        Model.RequestDateShamsi = PersianDate.Standard.ConvertDate.ToFa(Model.RequestDate);
+    }
+    else
+    {
+        Model.RequestDateShamsi = PersianDate.Standard.ConvertDate.ToFa(DateTime.Now);
+    }
+}
+
+    <div class="row">
+    @if (TempData["msg"] != null)
+    {
+       <div class="alert alert-success" role="alert"> @Html.Raw(TempData["msg"].ToString())  </div>
+    }
+    </div>
+    <input type="hidden" id="ActiveTab" name="ActiveTab" value="@Model.ActiveTab"  />
+
+<ul class="nav nav-tabs" id="myTab" role="tablist">
+<li class="nav-item" role="presentation">
+    <button class="nav-link" id="Detail-tab" data-bs-toggle="tab" data-bs-target="#Detail" type="button" role="tab" aria-controls="Detail" aria-selected="true">جزییات درخواست</button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="DoneSetting-tab" data-bs-toggle="tab" data-bs-target="#DoneSetting" type="button" role="tab" aria-controls="DoneSetting" aria-selected="true">تنظیمات اجرا</button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="Comment-tab" data-bs-toggle="tab" data-bs-target="#Comment" type="button" role="tab" aria-controls="Comment" aria-selected="false">تبادل نظر</button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="chat-tab" data-bs-toggle="tab" data-bs-target="#chat" type="button" role="tab" aria-controls="chat" aria-selected="false">گفتگو</button>
+  </li>
+    @if (User.IsInRole("TechAdmin"))
+    {   
+                   <li class="nav-item" role="presentation">
+                      <button class="nav-link" id="Dev-tab" data-bs-toggle="tab" data-bs-target="#Dev" type="button" role="tab" aria-controls="Dev" aria-selected="false">شرح برنامه نویس</button>
+                   </li>
+
+    }
+
+</ul>
+
+
+<div class="tab-content" id="myTabContent">
+    @*Detail-tab*@
+  <div class="tab-pane fade" id="Detail" role="tabpanel" aria-labelledby="Detail-tab">
+
+          <div   class="row" style="margin-bottom:1%;">
+           <div class="col-md-6">
+               <label asp-for="Title" class="control-label"></label>
+               <input type="text" asp-for="Title" class="form-control" disabled />
+           </div>
+           <div class="col-md-3">
+            <label asp-for="SystemId" class="control-label"></label>
+            <input type="text" asp-for="SystemIdStr" class="form-control" disabled/>
+
+           </div>
+           <div class="col-md-3">
+                 <label asp-for="SubSystemId" class="control-label"></label>
+                 <input type="text" asp-for="SubSystemIdStr" class="form-control" disabled/>
+           </div>
+    </div>
+      <div  class="row" style="margin-bottom:1%;">
+
+           <div class="col-md-3">
+               <label asp-for="Type" class="control-label"></label>
+               <input type="text" asp-for="TypeStr" class="form-control" disabled/>
+           </div>
+           <div class="col-md-3">
+                <label asp-for="Priority" class="control-label"></label> 
+                <input type="text" asp-for="PriorityStr" class="form-control" disabled/>
+           </div>
+               <div class="col-md-3">
+                  <label asp-for="OfferDoneDate" class="control-label"></label>
+                  <input type="text" asp-for="OfferDoneDateStr" class="form-control" disabled/>
+           </div>
+
+           <div class="col-md-3">
+                    <label asp-for="ProgressRate" class="control-label"></label>
+            <div class="progress"> 
+                    @{
+                        var pr = string.Format("width:{0}%", Model.ProgressRate == null ? 0 : Model.ProgressRate);
+                    }
+                <div class="progress-bar" id="ProgressRate" style=@pr></div>
+             </div>
+           </div>
+
+        </div>
+
+
+        <div   class="row" style="margin-bottom:1%;">
+              <div class="col-md-12"  style="margin-bottom:1%;">
+                        <label asp-for="Content" class="control-label" style="margin: 1%;"></label>
+                        <br />
+                        <div style="padding: 4px;margin: 4px;border: 1px solid #9991918f;border-radius: 4px;min-height:80px;">
+                    @Html.Raw(Model.Content) 
+                        </div>
+
+              </div> 
+
+               <div class="col-md-12"  style="margin-bottom:2%;">
+                        <label asp-for="ImportantPoints" class="control-label" style="margin: 1%;"></label>
+
+                        <textarea class="form-control" style="width: 100%;" disabled>@Model.ImportantPoints </textarea>
+              </div> 
+
+
+      <form asp-area="SAdmin" asp-controller="Request" asp-action="UpdateRequestByStAdmin" method="post" enctype="multipart/form-data">
+            <div class="col-md-12"  style="margin-bottom:1%;">
+             <label asp-for="StrategicAdditive" class="control-label" style="margin: 1%;"></label>
+             <div class="row">
+                 <div class="col-md-5">  <textarea  class="form-control" disabled>@Model.StrategicAdditive</textarea></div>
+                 <div class="col-md-1"><label style="font-size: 26px;padding: 10%;">+</label></div>
+                 <div class="col-md-6"><textarea asp-for="StrategicAdditive" class="form-control makeClean" id="StrategicChat"></textarea></div>
+
+             </div>
+            </div>
+       <div class="col-sm-12" style="margin-bottom:2%">
+           <div class="row">
+                  <div class="col-md-8">
+                        <label asp-for="fileDes"  class="control-label"></label>
+                        <input type="text" asp-for="fileDes" class="form-control" />
+                  </div>
+                  <div class="col-md-4">
+                  <label  class="control-label">انتخاب فایل:</label>
+                  <br>
+                  <input type="file" name="FileNames"  asp-for="FileNames" multiple data-btnClass="btn btn-primary" class="filestyle" data-text="انتخاب فایل" data-placeholder="فایل مورد نظر را انتخاب نمایید" />
+                 </div> 
+           </div>
+           
+       </div>
+       <div class="col-md-12" style="margin-bottom:2%">
+                    @if (Model.Files != null && Model.Files.Any())
+                    {
+                        foreach (var file in Model.Files)
+                        {
+                                            <label>توضیح فایل:@file.Value</label>
+                                           <a class="btn btn-danger" href="@file.Key" style="width:100px" target="_blank">فایل</a>
+                        }
+                    }
+
+        </div>
+
+                @if (Model.Step == (byte)Domain.Enums.RequestStep.Final)
+                {
+                              <div class="row" style="background-color: #00800030;padding: 1%;margin: 2%;border-radius: 4px;font-weight: bold;">
+
+                                  <div   class="col-md-4"> 
+                            @if (Model.DoneStatus == true)
+                            {
+                                                 <input type="checkbox" checked value="true" name="DoneStatus" id="DoneStatus" />
+                                                 <span>درخواست به پایان رسید</span>   
+                            }
+                            else
+                            {
+                                                 <input type="checkbox" value="true" name="DoneStatus" id="DoneStatus" />
+                                                 <span>درخواست به پایان رسید</span>   
+                            }
+                                   </div>
+                                   <div   class="col-md-5"></div>
+                                   <div   class="col-md-3"> 
+                                        تاریخ ثبت درخواست: @PersianDate.Standard.ConvertDate.ToFa(Model.RequestDate)
+                                   </div>
+                              </div>
+                }
+
+
+                @if (User.IsInRole("StrategicAdmin"))
+                {   
+                                               <input type="hidden" name="Id" value="@Model.Id"/>
+                                               <input type="hidden" name="CurrentTab" value="Detail"/>
+                                               <div   class="col-md-12"  style="margin-bottom:1%;">
+                                                    <button type="submit" class="btn btn-primary" style="margin-top:2%;width: 100px;margin-left: 1%;">ثبت</button>
+                                               </div>
+                }
+
+       </form>
+
+        </div>
+
+  </div>
+    @*End Of Detail-tab*@
+
+    @*DoneSetting-tab*@
+  <div class="tab-pane fade" id="DoneSetting" role="tabpanel" aria-labelledby="DoneSetting-tab">
+        @if (User.IsInRole("StrategicAdmin"))
+        {
+            <div   class="row" style="margin-bottom: 2%;margin-top: 2%;">
+                <div  class="col-md-12" style="margin-bottom: 2%;">
+                     <label asp-for="TechAdminIdea" class="control-label"></label>
+                     <br>
+                     <div style="padding: 4px;margin: 4px;border: 1px solid #9991918f;border-radius: 4px;min-height: 100px;">
+                        @Html.Raw(Model.TechAdminIdea)
+                     </div>
+                 </div>
+            </div>
+            <div class="row"  style="margin-bottom: 2%;">
+
+                 <div class="col-md-3">
+                          <label asp-for="DueDate" class="control-label"></label>
+                          <input type="text" asp-for="DueDateStr" class="form-control" disabled/>
+                 </div>
+                 <div class="col-md-3">
+                          <label asp-for="DoneBy" class="control-label"></label>
+                          <input type="text" asp-for="DoneByName" class="form-control" disabled/>
+                 </div>
+                 <div class="col-md-3">
+                          <label asp-for="Step" class="control-label"></label>
+                    @if (Model.Step != null)
+                    { 
+                      <input type="text" class="form-control" value="@EnumExtensions.GetDisplayName((RequestStep)Model.Step)" disabled/>
+                    }
+                 </div>
+
+
+           </div>
+        }
+
+
+        @if (User.IsInRole("TechAdmin"))
+        {
+         <form style="margin-top: 2%;" id="DoneSettingForm" asp-area="SAdmin" asp-controller="Request" asp-action="SaveAdminIdea" method="post" enctype="multipart/form-data">
+           <input type="hidden" name="Id" value="@Model.Id"/>
+                             <div  class="row" style="margin-bottom: 2%;">
+                                       <div class="col-md-3">
+                                             <label asp-for="DueDate" class="control-label"></label>
+                                             <div class="input-group mb-3">
+                                                  <span class="input-group-text cursor-pointer" id="DueDate">📅</span>
+                                                  <input type="text" class="form-control"   data-name="DueDate-text" placeholder="@Model.DueDateStr" >
+                                                  <input type="hidden" asp-for="DueDate" name="DueDate"  data-name="DueDate-date">
+                                            </div>
+                                       </div>
+                                       <div class="col-md-3">
+                                            <label asp-for="EstimatedHours" class="control-label"></label>
+                                            <input type="number" asp-for="EstimatedHours" class="form-control"/>
+                                       </div>
+                                       <div class="col-md-3">
+                                            <label asp-for="BeginDate" class="control-label"></label>
+                                               <div class="input-group mb-3">
+                                                  <span class="input-group-text cursor-pointer" id="BeginDate">📅</span>
+                                                  <input type="text" class="form-control"   data-name="BeginDate-text" placeholder="@Model.BeginDateStr">
+                                                    <input type="hidden" asp-for="BeginDate"  name="BeginDate"   data-name="BeginDate-date">
+                                            </div>
+                                       </div>
+         
+                                        <div class="col-md-3">
+                                        <label asp-for="Priority" class="control-label"></label>
+                                        <select asp-for="Priority"   class="form-control">
+                                            <option value="0">انتخاب کنید </option>
+                                            <option value="1">زیاد</option>
+                                            <option value="2">متوسط</option>
+                                            <option value="3">کم</option>
+                                        </select>
+                                       </div>
+         
+         
+                                    </div>
+         
+                       <div class="row" style="margin-bottom: 2%;">
+         
+                         <div class="col-md-3">
+                           <label asp-for="SystemId" class="control-label"></label>
+                           <select asp-for="SystemId"   class="form-control" onchange="GetSubSystems()">
+                                                                                                 <option selected="selected">انتخاب کنید...</option>
+                            @foreach (var item in Model.SystemTitles)
+                            {
+                                                                                                                                                          <option value="@item.Value">@item.Text</option>
+                            }
+                            </select>
+                         </div>
+                         <div class="col-md-3">
+                           <label asp-for="SubSystemId" class="control-label"></label>
+                           <select asp-for="SubSystemId"   class="form-control" >
+                            @if (Model.SubSystemIdStr != null)
+                            {
+                               <option>@Model.SubSystemIdStr</option>
+                            }
+                            else
+                            {
+                              <option>انتخاب کنید...</option>
+                            }
+                            </select>
+                          </div>
+
+                           <div class="col-md-3">
+                                                                                 <label asp-for="DoneBy" class="control-label"></label>
+                                                                                 <select class ="form-control" name="DoneBy" id="DoneBy">
+                            @foreach (var item in Model.DoneByNames)
+                            {
+                                if (item.Value == Model.DoneBy?.ToString())
+                                {
+                                      <option value="@item.Value" selected>@item.Text</option>
+                                }
+                                else
+                                {
+                                      <option value="@item.Value">@item.Text</option>
+                                }
+
+                            }
+                                                                                   </select>
+                                                                               </div>
+                                                                   <div class="col-md-3">
+                                                                              <label asp-for="SeenDate" class="control-label"></label>
+                                                                              <input type="text" value="@Model.SeenDateShamsi" class="form-control" disabled />
+
+                                                                   </div>
+
+                                                                                </div>
+
+
+
+
+
+
+                                                                               <div class="row"  style="margin-bottom: 2%;">
+                                                                                   <div  class="col-md-12">
+
+                                                                                          <label asp-for="TechAdminIdea" class="control-label"></label>
+                                                                                          <textarea id="TechAdminIdea" name="TechAdminIdea"   class="form-control">@Model.TechAdminIdea</textarea>
+                                                                                           <span asp-validation-for="TechAdminIdea" class="text-danger"></span>
+                                                                                   </div>
+                                                                                   <div  class="col-md-12">
+
+                                                                                          <label asp-for="TaskList" class="control-label"></label>
+                                                                                                  <div class="row">
+                                                                 <div class="col-md-5">  <textarea  class="form-control" disabled>@Model.TaskList</textarea></div>
+                                                                 <div class="col-md-1"><label style="font-size: 26px;padding: 10%;">+</label></div>
+                                                                 <div class="col-md-6"><textarea asp-for="TaskList" class="form-control makeClean" id="TaskList"></textarea></div>
+                                                             </div>
+                                                                                   </div>
+                                                                                </div>
+
+                                                        <div  class="row"  style="margin-bottom: 2%;">
+                                                            <div  class="col-md-3">
+                                                               <label asp-for="Step" class="control-label"></label>
+                                                               <select asp-for="Step" class="form-control" asp-items="Html.GetEnumSelectList<RequestStep>()">
+                                                                   <option>انتخاب کنید...</option>
+                                                               </select>
+                                                            </div>
+                                                                                          <div class="col-md-3"> 
+                                                                   <label asp-for="State" class="control-label"></label>
+                                                                         <select asp-for="State" class="form-control" asp-items="Html.GetEnumSelectList<RequestState>()">
+                                                                             <option>انتخاب کنید...</option>
+                                                                         </select>
+                                                                   </div>
+
+
+                                                        </div>
+                                                        <div   class="row"  style="margin-bottom:1%;">
+                                                              <input type="hidden" name="CurrentTab" value="DoneSetting"/>
+                                                               <button type="submit" class="btn btn-primary" style="margin-top:2%;width: 100px;margin-left: 1%;">ثبت</button>
+                                                        </div>
+                                                     </form>
+
+        }
+
+
+  </div>
+    @*End of DoneSetting-tab*@
+   
+    @*Comment-tab*@
+ <div class="tab-pane fade" id="Comment" role="tabpanel" aria-labelledby="Comment-tab">
+
+          <form style="margin-top: 2%;" asp-area="SAdmin" asp-controller="Request" asp-action="UpdateComments" method="post" enctype="multipart/form-data">
+
+          <input type="hidden" name="Id" value="@Model.Id"/>
+          <div class="row"  style="margin-bottom: 2%;">
+                @if (User.IsInRole("StrategicAdmin"))
+                {
+
+                     <div   class="col-md-12">  
+                          <label asp-for="TechDescForStrategic" class="control-label"></label>
+                       <div class="row">
+                            <div class="col-md-5">  <textarea  class="form-control" rows=6 disabled >@Model.TechDescForStrategic</textarea></div>
+                            <div class="col-md-1"><label style="font-size: 26px;padding: 10%;">+</label></div>
+                            <div class="col-md-6"><textarea asp-for="TechDescForStrategic" class="form-control makeClean" id="TechDescForStrategic"></textarea></div>
+                        </div>
+                     </div> 
+                     <div   class="col-md-12">
+                            <label asp-for="TechDescForTest" class="control-label"></label>
+                       <div class="row">
+                           <div class="col-md-5">  <textarea  class="form-control" rows=6  disabled>@Model.TechDescForTest</textarea></div>
+                           <div class="col-md-1"><label style="font-size: 26px;padding: 10%;">+</label></div>
+                           <div class="col-md-6"><textarea asp-for="TechDescForTest" class="form-control makeClean" id="TechDescForTest"></textarea></div>
+                       </div>
+                     </div>
+
+                }
+                else
+                {
+                     <div   class="col-md-12">  
+                          <label asp-for="TechDescForStrategic" class="control-label"></label>
+                        <div class="row">
+                            <div class="col-md-5">  <textarea  class="form-control" rows=6 disabled >@Model.TechDescForStrategic</textarea></div>
+                            <div class="col-md-1"><label style="font-size: 26px;padding: 10%;">+</label></div>
+                            <div class="col-md-6"><textarea asp-for="TechDescForStrategic" class="form-control makeClean" id="TechDescForStrategic"></textarea></div>
+                        </div>
+                     </div>
+
+                     <div   class="col-md-12"> 
+                          <label asp-for="TechDescForDev" class="control-label"></label>
+                        <div class="row">
+                           <div class="col-md-5">  <textarea  class="form-control" rows=6  disabled>@Model.TechDescForDev</textarea></div>
+                           <div class="col-md-1"><label style="font-size: 26px;padding: 10%;">+</label></div>
+                           <div class="col-md-6"><textarea asp-for="TechDescForDev" class="form-control makeClean" id="TechDescForDev"></textarea></div>
+                       </div>
+                     </div>
+
+                     <div   class="col-md-12">
+                            <label asp-for="TechDescForTest" class="control-label"></label>
+                       <div class="row">
+                           <div class="col-md-5">  <textarea  class="form-control" rows=6  disabled>@Model.TechDescForTest</textarea></div>
+                           <div class="col-md-1"><label style="font-size: 26px;padding: 10%;">+</label></div>
+                           <div class="col-md-6"><textarea asp-for="TechDescForTest" class="form-control makeClean" id="TechDescForTest"></textarea></div>
+                       </div>
+                     </div>
+                }
+
+
+
+           </div>
+           <div   class="row"  style="margin-bottom:1%;">
+                                 <input type="hidden" name="CurrentTab" value="Comment"/>
+                <button type="submit" class="btn btn-primary" style="margin-top:2%;width: 100px;margin-left: 1%;">ثبت</button>
+           </div>
+        </form>
+
+</div>
+    @*End of Comment-tab*@
+
+    @*chat-tab*@
+  <div class="tab-pane fade" id="chat" role="tabpanel" aria-labelledby="chat-tab">
+
+            <form style="margin-top: 2%;" asp-area="SAdmin" asp-controller="Request" asp-action="UpdateChats" method="post" enctype="multipart/form-data">
+
+                <input type="hidden" name="Id" value="@Model.Id"/>
+
+                <div class="row"  style="margin-bottom: 2%;">
+                      <div   class="col-md-12">  
+                        <label asp-for="Chat" class="control-label"></label>
+                          <div class="row">
+                              <div class="col-md-5">  <textarea  class="form-control" rows=20 disabled>@Model.Chat</textarea></div>
+                              <div class="col-md-1"><label style="font-size: 26px;padding:50%;">+</label></div>
+                              <div class="col-md-6"><textarea asp-for="Chat" class="form-control makeClean" id="Chat" rows=18></textarea>
+                                  <br>
+                                           <input type="hidden" name="CurrentTab" value="chat"/>
+                              <button type="submit" class="btn-success" style="width: 100%">ارسال</button>    
+                              </div>
+                          </div>
+                       </div>
+                 </div>
+            </form>
+
+  </div>
+
+      @*End of chat-tab*@
+  <div class="tab-pane fade" id="Dev" role="tabpanel" aria-labelledby="Dev-tab">
+      <div class="row" style="margin-bottom:2%">
+           <div   class="col-md-12">  
+              <label asp-for="ProgressDescription" class="control-label"></label>
+              <div style="padding: 4px;margin: 4px;border: 1px solid #9991918f;border-radius: 4px;min-height: 100px;">
+                    @Html.Raw(Model.ProgressDescription)
+              </div>
+
+           </div> 
+
+      </div>
+  </div>
+
+
+</div>
+
+
+
+
+</div>
+
+ <div  class="row">
+    <div class="col-md-12">
+        @if (TempData["back"] != null)
+        {
+           <a class="btn btn-danger"  href="@TempData["back"]" style="margin-top:2%;width:100px">بازگشت</a>
+        }
+     </div>
+ </div>
+
+@section Scripts {
+        <partial name="_ValidationScriptsPartial" />
+<script>
+
+    $( document ).ready(function() {
+      $(".makeClean").val("");
+
+      var tab="#"+$("#ActiveTab").val();
+      var tabTitle=tab+"-tab";
+      $(".tab-pane").removeClass("show");
+      $(".tab-pane").removeClass("active");
+      $(tab).addClass("show");
+      $(tab).addClass("active");
+      $(tabTitle).addClass("active");
+
+});
+
+  const dtp1Instance = new mds.MdsPersianDateTimePicker(document.getElementById('DueDate'), {
+  targetTextSelector: '[data-name="DueDate-text"]',
+  targetDateSelector: '[data-name="DueDate-date"]',});
+
+  const dtp2Instance = new mds.MdsPersianDateTimePicker(document.getElementById('BeginDate'), {
+  targetTextSelector: '[data-name="BeginDate-text"]',
+  targetDateSelector: '[data-name="BeginDate-date"]'});
+
+
+</script>
+    }
